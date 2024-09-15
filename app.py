@@ -25,7 +25,7 @@ class Verb(db.Model):
     example_two = db.Column(db.String(120))
 
 
-@app.route('/api/verbs', methods=['POST'])
+@app.route('/api/verbs/add', methods=['POST'])
 def add_verb():
     data = request.get_json()
     new_verb = Verb(verb=data['verb'], past=data['past'], past_participle=data['past_participle'],
@@ -42,6 +42,15 @@ def list_verbs():
         output.append({'verb': verb.verb, 'past': verb.past, 'past_participle': verb.past_participle,
                        'example_one': verb.example_one, 'example_two': verb.example_two})
     return jsonify(output)
+
+
+@app.route('/api/verb/<string:verb>', methods=['GET'])
+def get_verb(verb):
+    verb_detail = Verb.query.get(verb)
+    if verb_detail:
+        return jsonify({'verb': verb_detail.verb, 'past': verb_detail.past, 'past_participle': verb_detail.past_participle, 'example_one': verb_detail.example_one, 'example_two': verb_detail.example_two})
+    else:
+        return jsonify({'message': 'Verb not found'}), 404
 
 
 
