@@ -6,16 +6,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mydatabase.db'
 db = SQLAlchemy(app)
 
 
-# Irregular verbs examples data
-irregular_verbs = {
-    "be": {"past": "was/were", "past_participle": "been", "examples":
-           ["I am happy.", "He was here yesterday."]},
-    "go": {"past": "went", "past_participle": "gone", "examples":
-           ["I go to school,", "She went to the market."]},
-    "eat":{"past": "ate", "past_participle": "eaten", "examples":
-           ["I eat breakfast.", "He has eaten already"]}
-}
-
 class Verb(db.Model):
     #id = db.Column(db.Integer, primary_key=True)
     verb = db.Column(db.String(20), primary_key=True)
@@ -51,6 +41,18 @@ def get_verb(verb):
         return jsonify({'verb': verb_detail.verb, 'past': verb_detail.past, 'past_participle': verb_detail.past_participle, 'example_one': verb_detail.example_one, 'example_two': verb_detail.example_two})
     else:
         return jsonify({'message': 'Verb not found'}), 404
+
+
+@app.route('/api/verb/<string:verb>/delete', methods=['DELETE'])
+def delete_verb(verb):
+    verb_to_delete = Verb.query.filter_by(verb=verb).first()
+    if verb_to_delete:
+        db.session.delete(verb_to_delete)
+        db.session.commit()
+        return jsonify({'message': 'Verb deleted successfully!'}), 200
+    else:
+        return jsonify({'message': 'Verb not found'}), 404
+
 
 
 
