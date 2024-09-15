@@ -54,6 +54,26 @@ def delete_verb(verb):
         return jsonify({'message': 'Verb not found'}), 404
 
 
+@app.route('/api/verb/<string:verb>/update', methods=['PUT'])
+def update_verb(verb):
+    verb_to_update = Verb.query.get(verb)
+    if verb_to_update:
+        data = request.get_json()
+        print(data)
+        if 'verb' in data:
+            verb_to_update.verb = data['verb']
+        if 'past' in data:
+            verb_to_update.past = data['past']
+        if 'past_participle' in data:
+            verb_to_update.past_participle = data['past_participle']
+        if 'example_one' in data:
+            verb_to_update.example_one = data['example_one']
+        if 'example_two' in data:
+            verb_to_update.example_two = data['example_two']
+        db.session.commit()
+        return jsonify({'message':'Verb updated successfully!'})
+    else:
+        return jsonify({'message': 'Verb not found'}), 404
 
 
 if __name__ == '__main__':
