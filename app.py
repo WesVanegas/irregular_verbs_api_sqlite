@@ -15,7 +15,7 @@ class Verb(db.Model):
     example_two = db.Column(db.String(120))
 
 
-@app.route('/api/verbs/add', methods=['POST'])
+@app.route('/api/verb/add', methods=['POST'])
 def add_verb():
     data = request.get_json()
     new_verb = Verb(verb=data['verb'], past=data['past'], past_participle=data['past_participle'],
@@ -23,6 +23,36 @@ def add_verb():
     db.session.add(new_verb)
     db.session.commit()
     return jsonify({'message': 'Verb added succesfully!'}), 201
+
+@app.route('/api/verbs/add', methods=['POST'])
+def add_multiple_verbs():
+    data = request.get_json()
+    if not isinstance(data, list):
+        return jsonify({'message': 'Request body must be a list of verbs'}), 400
+
+    failed_verbs = []
+
+    for item in data:
+        if 'verb' in item and 'past' in item and 'past_participle' in item and 'example_one' in item:
+            new_verb = Verb(verb=item['verb'], past=item['past'], past_participle=item['past_participle'],
+                            example_one=item['example_one'], example_two=item['example_two'])
+            try:
+                db.session.add(new_verb)
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                failed_verbs.append({'verb': item, 'error': str(e)})
+        else:
+            failed_verbs.append({'verb':item, 'error': 'Missing name or something'})
+
+    if failed_verbs:
+        return jsonify({
+            'message': 'Some verbs could not be added',
+            'failed_verbs': failed_verbs
+        }), 400
+    else:
+        return jsonify({'message':'All verbs added succesfully'}), 201
+
 
 @app.route('/api/verbs', methods=['GET'])
 def list_verbs():
@@ -32,6 +62,8 @@ def list_verbs():
         output.append({'verb': verb.verb, 'past': verb.past, 'past_participle': verb.past_participle,
                        'example_one': verb.example_one, 'example_two': verb.example_two})
     return jsonify(output)
+
+
 
 
 @app.route('/api/verb/<string:verb>', methods=['GET'])
