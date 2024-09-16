@@ -169,6 +169,4 @@ cython_debug/
 
 # End of https://www.toptal.com/developers/gitignore/api/flask
 
-example_json.txt
-methodGet.txt
-list_verbs.txt
+extras/

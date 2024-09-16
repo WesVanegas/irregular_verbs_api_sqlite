@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
+import random
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mydatabase.db'
@@ -64,8 +65,6 @@ def list_verbs():
     return jsonify(output)
 
 
-
-
 @app.route('/api/verb/<string:verb>', methods=['GET'])
 def get_verb(verb):
     verb_detail = Verb.query.get(verb)
@@ -74,6 +73,25 @@ def get_verb(verb):
     else:
         return jsonify({'message': 'Verb not found'}), 404
 
+
+@app.route('/api/verb/random', methods=['GET'])
+def get_random_verb():
+    verbs = Verb.query.all()
+
+    if not verbs:
+        return jsonify({'error': 'No verbs found'}), 404
+
+    random_verb = random.choice(verbs)
+
+    output = {
+        'verb': random_verb.verb,
+        'past': random_verb.past,
+        'past_participle': random_verb.past_participle,
+        'example_one': random_verb.example_one,
+        'example_two': random_verb.example_two
+    }
+
+    return jsonify(output)
 
 @app.route('/api/verb/<string:verb>/delete', methods=['DELETE'])
 def delete_verb(verb):
@@ -106,6 +124,7 @@ def update_verb(verb):
         return jsonify({'message':'Verb updated successfully!'})
     else:
         return jsonify({'message': 'Verb not found'}), 404
+
 
 
 if __name__ == '__main__':
